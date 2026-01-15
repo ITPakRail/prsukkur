@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pakistan Railways – Seat Availability</title>
+<meta name="description" content="Live train tracking of Pakistan Railways. Check real-time train status, railway booking, delays and running position.">
+  <meta name="keywords" content="Pakistan Railways live tracking, train status Pakistan, railway ticket,Pak Rail tracking">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Choices.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+}
+
+/* ===== TOP PANEL ===== */
+.top-panel {
+  background: #1b7f3b;
+  color: white;
+  text-align: center;
+  padding: 15px;
+}
+.top-panel h1 {
+  margin: 0;
+  font-size: 24px;
+}
+.top-panel div {
+  font-size: 14px;
+  margin-top: 4px;
+}
+/* ================= NAV ================= */
+nav {
+  background-color: rgba(0, 0, 50, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav a {
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+nav a:hover {
+  background-color: #1a237e;
+}
+
+/* ===== SEARCH PANEL ===== */
+.search-panel {
+  background: white;
+  padding: 15px;
+  margin: 15px auto;
+  border-radius: 6px;
+  box-shadow: 0 0 6px #ccc;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: flex-end;
+  max-width: 900px;
+}
+
+.search-panel .field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 160px;
+}
+
+.search-panel button {
+  padding: 8px;
+  min-width: 120px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main-layout {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ads {
+  width: 300px;
+  min-height: 500px;
+  background: #e9ecef;
+  margin: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #888;
+}
+
+.results-center {
+  flex: 1;
+  min-width: 300px;
+  margin: 10px;
+}
+
+/* ===== TABLE / CARDS ===== */
+table {
+  width: 100%;
+  border-spacing: 10px;
+}
+
+td {
+  width: 50%;
+  vertical-align: top;
+}
+
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 6px #ddd;
+  margin-bottom: 12px;
+}
+
+.train-name {
+  font-size: 17px;
+  font-weight: bold;
+  color: #1b7f3b;
+}
+
+.route {
+  margin: 6px 0;
+  font-size: 14px;
+}
+.from { color: #0d47a1; font-weight: bold; }
+.to { color: #b71c1c; font-weight: bold; }
+
+.time-line {
+  font-size: 13px;
+  background: #f1f8e9;
+  padding: 6px;
+  border-radius: 4px;
+  margin: 6px 0;
+}
+
+.seat {
+  font-size: 13px;
+  margin-top: 2px;
+}
+.seat-count { color: #2e7d32; font-weight: bold; }
+.seat-fare { color: #1565c0; font-weight: bold; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  .search-panel {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-panel .field {
+    width: 100%;
+  }
+  .ads { display: none; }
+  td { width: 100%; display: block; }
+  table { border-spacing: 0; }
+}
+
+/* ===== Choices.js overrides ===== */
+.choices__inner {
+  background-color: white !important;
+  color: black !important;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  min-height: 40px;
+}
+.choices__list--dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white !important;
+}
+.choices__list--dropdown .choices__item {
+  color: black !important;
+}
+.choices__list--dropdown::-webkit-scrollbar {
+  width: 10px;
+}
+.choices__list--dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.choices__list--dropdown::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+.choices__list--dropdown::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+  
+/* Footer */
+footer {
+  background:#2e7d32;
+  color:#ffffff;
+  padding:15px 10px;
+  text-align:center;
+  font-family:Arial, sans-serif;
+  margin-top:40px;
+}
+
+footer a {
+  color:#ffeb3b;
+  text-decoration:none;
+  margin:0 8px;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP PANEL -->
+<div class="top-panel">
+  <h1>Pakistan Railways</h1>
+  <div><strong>Check Seat / Berth Availability</strong></div>
+</div>
+<!-- MENU -->
+<nav>
+  <a href="index.html">Home</a>
+  <a href="timing.html">Train Timing</a>
+  <a href="ticketing.html">Ticketing</a>
+  <a href="tracking1.html">Train Tracking</a>
+
+</nav>
+<!-- SEARCH PANEL -->
+<div class="search-panel">
+    <div class="field">
+    <label for="date">Date</label>
+    <input type="date" id="date">
+  </div>
+
+  <div class="field">
+    <label for="fromSelect">From</label>
+    <select id="fromSelect"></select>
+  </div>
+
+  <div class="field">
+    <label for="toSelect">To</label>
+    <select id="toSelect"></select>
+  </div>
+
+
+  <div class="field">
+    <button onclick="search()">Search</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="main-layout">
+  <div class="ads">.</div>
+
+  <div class="results-center">
+    <table id="resultsTable"></table>
+  </div>
+
+  <div class="ads">.</div>
+</div>
+
+<!-- Choices.js -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxIK397B-pelGligxVrMJaibWfIrEM13lipzrHf3MD9tq5woVBPxboNO2g191rn1TNF/exec";
+let stationMap = {};
+let fromChoices, toChoices;
+
+// Load stations
+fetch(`${GAS_URL}?action=stations`)
+  .then(r => r.json())
+  .then(data => {
+    const stations = data.rows ?? data; // adjust if d.rows exists
+    console.log("Stations loaded:", stations);
+
+    const fromSelect = document.getElementById("fromSelect");
+    const toSelect = document.getElementById("toSelect");
+
+    stations.forEach(s => {
+      stationMap[s.stationNameEn] = s.stationCode;
+
+      const opt1 = document.createElement("option");
+      opt1.value = s.stationNameEn;
+      opt1.textContent = s.stationNameEn;
+      fromSelect.appendChild(opt1);
+
+      const opt2 = document.createElement("option");
+      opt2.value = s.stationNameEn;
+      opt2.textContent = s.stationNameEn;
+      toSelect.appendChild(opt2);
+    });
+
+    // Initialize Choices.js after options exist
+    fromChoices = new Choices(fromSelect, {
+      searchEnabled: true,
+      itemSelectText: '',
+      placeholderValue: 'From station...',
+      shouldSort: false
+    });
+
+    toChoices = new Choices(toSelect, {
+      searchEnabled: true,
+      itemSelectText: '',
+      placeholderValue: 'To station...',
+      shouldSort: false
+    });
+  })
+  .catch(err => console.error("Error loading stations:", err));
+
+// Search function
+function search() {
+  const fromName = fromChoices.getValue(true);
+  const toName = toChoices.getValue(true);
+  const travelDate = document.getElementById("date").value;
+
+  if (!fromName || !toName || !travelDate) {
+    return alert("Please select From, To stations and Date");
+  }
+
+  const payload = {
+    boardStationCode: stationMap[fromName],
+    arrivalStationCode: stationMap[toName],
+    travelDate: travelDate + " 00:00:00",
+    travelPeriod: "00:00-24:00",
+    searchType: 0
+  };
+
+  fetch(GAS_URL, {
+    method: "POST",
+    body: JSON.stringify({ action: "searchTrains", payload })
+  })
+  .then(r => r.json())
+  .then(showResults)
+  .catch(err => console.error("Error fetching trains:", err));
+}
+
+// Render results
+function showResults(data) {
+  const table = document.getElementById("resultsTable");
+  table.innerHTML = "";
+
+  if (!data.rows || data.rows.length === 0) {
+    table.innerHTML = "<tr><td colspan='2'>No trains found.</td></tr>";
+    return;
+  }
+
+  let row;
+  data.rows.forEach((t, i) => {
+    if(i % 2 === 0) row = table.insertRow();
+    const cell = row.insertCell();
+
+    let html = `
+      <div class="card">
+        <div class="train-name">${t.trainClassName}</div>
+        <div class="route">
+          From <span class="from">${t.departureStationCode}</span>
+          → To <span class="to">${t.destinationStationCode}</span>
+        </div>
+        <div class="time-line">
+          ${t.departureTime} → ${t.arrivalTime}
+        </div>
+    `;
+    t.seatTypeList.forEach(s => {
+      html += `
+        <div class="seat">
+          ${s.seatTypeNameEn} :
+          <span class="seat-count">${s.surplus}</span>
+          (Fare:<span class="seat-fare">Rs.${s.price ?? "N/A"}</span>)
+        </div>
+      `;
+    });
+    html += `</div>`;
+    cell.innerHTML = html;
+  });
+}
+</script>
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 <strong>pakrail.online</strong>. All Rights Reserved.</div>
+  <div>
+    <a href="privacy-policy.html">Privacy Policy</a> |
+    <a href="disclaimer.html">Disclaimer</a> |
+    <a href="about-us.html">About Us</a> |
+    <a href="contact-us.html">Contact</a>
+  </div>
+  <div style="font-size:13px;color:#dcdcdc;">
+    Independent information portal.
+  </div>
+</footer>
+
+</body>
+</html>

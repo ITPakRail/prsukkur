@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Train 27 - Live Fixed Snapshot</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f0f2f5; }
+        .dashboard { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .status-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; padding: 10px; background: #e3f2fd; border-radius: 8px; }
+        .dot { height: 12px; width: 12px; border-radius: 50%; background: #ccc; }
+        .dot.active { background: #4caf50; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.4; } }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #eee; text-align: left; }
+        th { background: #1565c0; color: white; }
+        button { background: #2e7d32; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>Train 27 Snapshot Tracker</h2>
+    
+    <div class="status-bar">
+        <div id="status-dot" class="dot"></div>
+        <span id="status-msg">Initializing Connection...</span>
+    </div>
+
+    <button onclick="takeSnapshot()">CAPTURE CURRENT POSITION</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Train Code</th>
+                <th>Current Lat/Lon</th>
+                <th>Speed</th>
+                <th>Next Station ETA</th>
+                <th>Capture Time</th>
+            </tr>
+        </thead>
+        <tbody id="snapshot-body">
+            <tr><td colspan="5" style="text-align:center">No data captured yet.</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script>
+    let latestTrainData = null;
+    const trainIdToWatch = "27";
+
+    // 1. Connect using the proper Socket.IO client
+    const socket = io("wss://cotrolroomapi.pakraillive.com", {
+        transports: ["websocket"],
+        path: "/socket.io/"
+    });
+
+    socket.on("connect", () => {
+        document.getElementById('status-dot').className = "dot active";
+        document.getElementById('status-msg').innerText = "Connected & Listening...";
+    });
+
+    // 2. Listen for ANY event (Socket.io often uses specific event names or catch-all)
+    socket.onAny((eventName, data) => {
+        // In PakRail, the 'eventName' is often the TrainID (e.g., "271201")
+        if (eventName.startsWith(trainIdToWatch)) {
+            latestTrainData = {
+                code: eventName,
+                ...data
+            };
+            document.getElementById('status-msg').innerHTML = 
+                `Receiving Live Stream for <b>${eventName}</b>`;
+        }
+    });
+
+    // 3. The "Manual Fetch" function
+    function takeSnapshot() {
+        if (!latestTrainData) {
+            alert("Waiting for train 27 to send its next GPS pulse...");
+            return;
+        }
+
+        const tbody = document.getElementById('snapshot-body');
+        const timestamp = new Date().toLocaleTimeString();
+
+        // Overwrite the table with the fixed data from the moment of the click
+        tbody.innerHTML = `
+            <tr>
+                <td><b>${latestTrainData.code}</b></td>
+                <td>${latestTrainData.lat.toFixed(5)}, ${latestTrainData.lon.toFixed(5)}</td>
+                <td>${latestTrainData.sp} km/h</td>
+                <td>${latestTrainData.NextStationETA || 'N/A'}</td>
+                <td>${timestamp}</td>
+            </tr>
+        `;
+    }
+
+    socket.on("connect_error", (err) => {
+        document.getElementById('status-msg').innerText = "Connection Error: " + err.message;
+    });
+</script>
+
+</body>
+</html>

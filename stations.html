@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pakistan Railways Sukkur Division – Stations</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f5f5f5;
+}
+header {
+  background: #2e7d32;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+}
+nav {
+  background-color: rgba(0, 0, 50, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+nav a {
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  transition: background 0.3s;
+}
+nav a:hover {
+  background-color: #1a237e;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+  vertical-align: top;
+}
+th {
+  background: #e8f5e9;
+}
+ul {
+  margin: 0;
+  padding-left: 18px;
+  text-align: left;
+}
+li {
+  margin-bottom: 4px;
+}
+  /* ===== Blinking Train Tracking menu ===== */
+.blink-tracking {
+  color: yellow !important;
+  font-weight: bold;
+  animation: blinkText 1s infinite;
+}
+
+@keyframes blinkText {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>Pakistan Railways – Sukkur Division (Stations)</header>
+
+<nav id="menu">
+  <a href="index.html">Home</a>
+  <a href="stations.html">Stations</a>
+  <a href="timing.html">Train Timing</a>
+    <a href="availSeats.html" class="blink-tracking">Seat Availability</a>
+  <a href="ticketing.html">Ticketing</a>
+  <a href="complaint.html">Register Complaint</a>
+  <a href="contactus.html">Contact Us</a>
+   <a href="downloads.html">Downloads</a>
+  <a href="tracking1.html" class="blink-tracking">Train Tracking</a>
+</nav>
+
+<main style="padding:20px;">
+<h3>Stations Information</h3>
+<input
+  type="text"
+  id="searchBox"
+  placeholder="🔍 Search station or facility..."
+  style="width:100%; padding:10px; margin-bottom:12px; font-size:16px;"
+  onkeyup="filterTable()"
+/>
+
+<table id="stationsTable">
+  <thead>
+    <tr>
+      <th>SNO</th>
+      <th>Station</th>
+      <th>Main Facilities</th>
+      <th>Pics</th>
+      <th>Google Map</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</main>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbya7KRQupcY_anV146gjtN0EeH6hQakjh20emQsgJqY0seA8MRV0vqst3zyE4zL2t6b/exec?action=stations";
+
+let stationsData = []; // ✅ store original data
+
+// Convert facilities text into bullet list
+function formatFacilities(text) {
+  if (!text) return "";
+  const items = text.split(/,|\n/).map(i => i.trim()).filter(i => i);
+  return `<ul>${items.map(i => `<li>${i}</li>`).join("")}</ul>`;
+}
+
+// Render table rows
+function renderTable(data) {
+  const tbody = document.querySelector("#stationsTable tbody");
+  tbody.innerHTML = "";
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5">No matching records found</td></tr>`;
+    return;
+  }
+
+  data.forEach(row => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${row.sno}</td>
+        <td>${row.station}</td>
+        <td>${formatFacilities(row.facilities)}</td>
+        <td><a href="${row.pics}" target="_blank">🖼 View</a></td>
+        <td><a href="${row.map}" target="_blank">📍 Map</a></td>
+      </tr>`;
+  });
+}
+
+// Filter function
+function filterTable() {
+  const keyword = document.getElementById("searchBox").value.toLowerCase();
+
+  const filtered = stationsData.filter(row =>
+    row.station.toLowerCase().includes(keyword) ||
+    (row.facilities && row.facilities.toLowerCase().includes(keyword))
+  );
+
+  renderTable(filtered);
+}
+
+// Fetch data
+fetch(API_URL)
+  .then(res => res.json())
+  .then(data => {
+    stationsData = data;   // ✅ save original
+    renderTable(stationsData);
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Failed to load stations data");
+  });
+</script>
+
+</body>
+</html>

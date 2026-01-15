@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pakistan Railways – Live Train Status</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f5f5f5;
+}
+
+/* Header */
+.header {
+  background-color: #2e7d32;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+}
+
+.header h1 {
+  flex-grow: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 22px;
+}
+
+/* Controls */
+.controls {
+  margin: 20px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+select, input, button {
+  padding: 6px 10px;
+  font-size: 15px;
+}
+
+button {
+  background: #2e7d32;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #1b5e20;
+}
+
+/* Table */
+table {
+  width: 96%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+th {
+  background: #2e7d32;
+  color: white;
+}
+
+small {
+  color: #555;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>Pakistan Railways – Sukkur Division (Live)</h1>
+</div>
+
+<div class="controls">
+  <label>Date:
+    <input type="date" id="datePicker">
+  </label>
+
+  <label>Train:
+    <select id="trainSelect">
+      <option value="">Select Train</option>
+    </select>
+  </label>
+
+  <button id="checkStatus">Check Status</button>
+</div>
+
+<table id="statusTable">
+  <thead>
+    <tr>
+      <th>Train</th>
+      <th>Status</th>
+      <th>Previous Station</th>
+      <th>Next Station (Schedule)</th>
+      <th>Live Latitude</th>
+      <th>Live Longitude</th>
+      <th>Last GPS Update</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td colspan="7">Select a train to view live data</td></tr>
+  </tbody>
+</table>
+
+<!-- Socket.IO -->
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+/* ================= CONFIG ================= */
+const GAS_API = "https://script.google.com/macros/s/AKfycbya7KRQupcY_anV146gjtN0EeH6hQakjh20emQsgJqY0seA8MRV0vqst3zyE4zL2t6b/exec";
+
+/* ================= STATE ================= */
+let liveLat = null;
+let liveLng = null;
+let liveTime = null;
+
+/* ================= DATE ================= */
+document.getElementById("datePicker").valueAsDate = new Date();
+
+/* ================= LOAD TRAINS ================= */
+fetch(`${GAS_API}?action=liveTrains`)
+  .then(r => r.json())
+  .then(trains => {
+    const sel = document.getElementById("trainSelect");
+    trains.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.TrainId;
+      opt.textContent = t.TrainNameWithNumber || `${t.TrainName} ${t.TrainNumber}${t.IsUp ? "UP" : "DN"}`;
+      sel.appendChild(opt);
+    });
+  });
+
+/* ================= SOCKET (LIVE GPS) ================= */
+const socket = io("https://cotrolroomapi.pakraillive.com", {
+  transports: ["websocket"],
+  upgrade: false
+});
+
+socket.on("connect", () => {
+  console.log("✅ Socket connected");
+});
+
+socket.onAny((event, data) => {
+
+  if (!data) return;
+
+  const lat = data.lat || data.latitude || data.Latitude;
+  const lng = data.lon || data.longitude || data.Longitude;
+
+  if (lat && lng) {
+    liveLat = lat;
+    liveLng = lng;
+    liveTime = new Date().toLocaleTimeString();
+  }
+});
+
+/* ================= CHECK STATUS ================= */
+document.getElementById("checkStatus").addEventListener("click", () => {
+
+  const trainId = document.getElementById("trainSelect").value;
+  if (!trainId) {
+    alert("Select a train");
+    return;
+  }
+
+  fetch(`${GAS_API}?action=liveStatus&trainId=${trainId}`)
+    .then(r => r.json())
+    .then(raw => {
+
+      const data = Array.isArray(raw) ? raw[0] : raw;
+      if (!data) {
+        alert("No data");
+        return;
+      }
+
+      const tbody = document.querySelector("#statusTable tbody");
+      tbody.innerHTML = "";
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${document.getElementById("trainSelect").selectedOptions[0].text}</td>
+        <td>${data.status || "UNKNOWN"}</td>
+        <td>${data.lastCrossed?.StationName || "N/A"}</td>
+        <td>${data.nextStation?.StationName || "N/A"}</td>
+        <td>${liveLat || "Waiting..."}</td>
+        <td>${liveLng || "Waiting..."}</td>
+        <td>${liveTime || "No GPS yet"}</td>
+      `;
+
+      tbody.appendChild(row);
+    })
+    .catch(() => alert("Failed to load status"));
+});
+</script>
+
+</body>
+</html>

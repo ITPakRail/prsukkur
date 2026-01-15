@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pakistan Railways - Secure Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        :root { --pk-green: #005a32; --pk-light-green: #2e7d32; --bg-gray: #f0f2f5; }
+
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background-color: var(--bg-gray); padding: 0; margin: 0; color: #333; }
+
+        .page-wrapper { display: flex; justify-content: center; max-width: 1400px; margin: auto; padding: 15px; gap: 15px; }
+        .main-content { flex: 1; width: 100%; max-width: 1000px; }
+
+        .dashboard { background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden; }
+        .header-box { background: var(--pk-green); color: white; padding: 20px; text-align: center; }
+
+        .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #e8f5e9; padding: 20px; align-items: end; }
+        label { font-weight: bold; color: var(--pk-light-green); display: block; margin-bottom: 5px; font-size: 14px; }
+
+        input { padding: 12px; border: 1px solid #ccc; border-radius: 6px; width: 100%; font-size: 15px; box-sizing: border-box; background: white; outline: none; }
+        input:focus { border-color: var(--pk-green); box-shadow: 0 0 5px rgba(0,90,50,0.2); }
+
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th { background: var(--pk-light-green); color: white; padding: 15px; text-align: left; font-size: 13px; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+        @media (max-width: 768px) {
+            .page-wrapper { padding: 10px; }
+            .ad-sidebar { display: none; }
+            .controls { grid-template-columns: 1fr; }
+            thead { display: none; }
+            td { display: block; text-align: right; border: none; padding: 10px 15px; position: relative; }
+            td::before { content: attr(data-label); position: absolute; left: 15px; font-weight: bold; color: #666; text-transform: uppercase; font-size: 12px; }
+            tr { display: block; border-bottom: 2px solid var(--pk-green); margin-bottom: 10px; }
+        }
+
+        .blink-text { animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .delay-red { color: #d32f2f; font-weight: bold; }
+        .speed-val { color: #1976d2; font-weight: bold; font-family: monospace; }
+        .status-msg { padding: 15px; font-size: 12px; color: #666; font-style: italic; background: #fafafa; border-top: 1px solid #eee; }
+        .ad-placeholder { background: #e0e0e0; border: 1px dashed #bbb; color: #888; display: flex; align-items: center; justify-content: center; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+    <aside class="ad-sidebar" style="width:160px;"><div class="ad-placeholder" style="height:600px;">Ad</div></aside>
+
+    <main class="main-content">
+        <div class="dashboard">
+            <div class="header-box"><h2 style="margin:0; font-size: 1.4rem;">Pakistan Railways Live GPS</h2></div>
+
+            <div class="controls">
+                <div>
+                    <label>Travel Date</label>
+                    <input type="date" id="datePicker" onchange="updateTracker()">
+                </div>
+                <div>
+                    <label>Type or Select Train</label>
+                    <input list="trainList" id="trainSearch" placeholder="Click to see all or Type Name..."
+                           oninput="handleSearchInput()"
+                           onclick="this.value=''; this.placeholder='Searching...';"
+                           onfocus="this.value='';"
+                           autocomplete="off">
+                    <datalist id="trainList"></datalist>
+                </div>
+                <div>
+                    <label>Tracking ID</label>
+                    <div id="targetDisplay" style="font-family:monospace; font-weight:bold; font-size:20px; color:var(--pk-green);">----</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Train</th><th>Next</th><th>Prev</th><th>Delay</th><th>Speed</th><th>ETA</th><th>Update</th>
+                    </tr>
+                    </thead>
+                    <tbody id="liveRow">
+                    <tr><td colspan="7" style="text-align:center; padding:40px; color:#999;">Search and select a train to begin.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="statusMsg" class="status-msg">System Initializing...</div>
+        </div>
+        <footer style="text-align: center; padding: 20px; color: #888; font-size: 12px;">© 2026 Secure Railway Tracker</footer>
+    </main>
+
+    <aside class="ad-sidebar" style="width:160px;"><div class="ad-placeholder" style="height:600px;">Ad</div></aside>
+</div>
+
+<script>
+    // 1. YOUR SETTINGS
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwr7uDECCeZx1EKgQR85b0DZ9zFAW8eBQb8t-YhKV-tMnnY8qhcPMj8TATwU238lk7xBw/exec"; // Paste your /exec URL here
+    
+    let socket;
+    let stations = [];
+    let currentTargetID = "";
+    let selectedTrainName = "";
+
+    document.getElementById('datePicker').value = new Date().toISOString().split('T')[0];
+
+  function init() {
+    const select = document.getElementById('trainSelect');
+    const status = document.getElementById('statusMsg');
+    
+    status.innerText = "Loading Fleet... 🛰️";
+
+    // DO NOT add headers, DO NOT add mode: 'cors'. 
+    // A naked fetch like this is a "Simple Request".
+    fetch(GAS_URL + "?action=get-fleet")
+        .then(response => {
+            // This is the stage where the browser was previously blocking you
+            return response.json(); 
+        })
+        .then(data => {
+            const trains = data.Response || [];
+            
+            select.innerHTML = '<option value="">-- Choose Train --</option>';
+            
+            // Sort and populate
+            trains.filter(t => t.IsLive).sort((a,b) => 
+                a.TrainNameWithNumber.localeCompare(b.TrainNameWithNumber)
+            ).forEach(t => {
+                select.appendChild(new Option(t.TrainNameWithNumber, t.TrainNumber));
+            });
+
+            status.innerText = "System Ready ✅";
+            if (typeof initSocket === "function") initSocket();
+        })
+        .catch(err => {
+            console.error("Browser blocked data transfer:", err);
+            status.innerText = "Security Block. Refresh or check GAS Deploy.";
+        });
+}
+    function initSocket() {
+        // Socket logic remains identical to your original working code
+        socket = io("wss://cotrolroomapi.pakraillive.com", { transports: ["websocket"], path: "/socket.io/" });
+        socket.onAny((id, data) => {
+            if (id === currentTargetID) {
+                render(id, data, true);
+            }
+        });
+    }
+
+    async function updateTracker() {
+        const trainNum = document.getElementById('trainSelect').value;
+        const selDate = new Date(document.getElementById('datePicker').value);
+        if (!trainNum || isNaN(selDate)) return;
+
+        selectedTrainName = document.getElementById('trainSelect').options[document.getElementById('trainSelect').selectedIndex].text;
+        
+        const dd = String(selDate.getDate()).padStart(2, '0');
+        const mm = String(selDate.getMonth() + 1).padStart(2, '0');
+        currentTargetID = `${trainNum}${dd}${mm}`;
+        document.getElementById('targetDisplay').innerText = currentTargetID;
+
+        document.getElementById('statusMsg').innerText = "Syncing station data...";
+        // Inside updateTracker(), replace the fetches with this style:
+const sRes = await fetch(`${GAS_URL}?action=get-stations&id=${trainNum}`, { redirect: 'follow' });
+const sData = await sRes.json();
+stations = sData.Response || [];
+
+const lRes = await fetch(`${GAS_URL}?action=get-location&id=${trainNum}`, { redirect: 'follow' });
+const lData = await lRes.json();
+        
+        if (lData.IsSuccess && lData.Response) {
+            const r = lData.Response;
+            render(currentTargetID, {
+                lat: parseFloat(r.Latitude),
+                lon: parseFloat(r.Longitude),
+                sp: r.Speed,
+                prev_st: r.ArrivalStationID,
+                next_st: r.NextStationID,
+                late_by: r.DelayMinutes,
+                eta_raw: r.ExpectedArrivalTime 
+            }, false);
+            document.getElementById('statusMsg').innerText = "GPS Synced. Listening for pulses...";
+        }
+    }
+
+    // formatTime and render functions remain the same...
+    function formatTime(min) {
+        if (!min || min <= 0) return "On Time";
+        const h = Math.floor(min / 60);
+        const m = min % 60;
+        return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function render(id, data, isLiveUpdate) {
+        const tbody = document.getElementById('liveRow');
+        const prev = stations.find(s => s.StationDetailsId == data.prev_st);
+        const next = stations.find(s => s.StationDetailsId == data.next_st);
+        const etaDisplay = data.eta_raw || "Calculating...";
+
+        const rowHTML = `<tr>
+            <td><strong>${selectedTrainName}</strong></td>
+            <td>${next ? next.StationName : 'ID: '+data.next_st}</td>
+            <td>${prev ? prev.StationName : 'ID: '+data.prev_st}</td>
+            <td class="delay-red">${formatTime(data.late_by)}</td>
+            <td class="speed-val">${data.sp} km/h</td>
+            <td style="color:#2e7d32; font-weight:bold;">${etaDisplay}</td>
+            <td>${new Date().toLocaleTimeString()} ${isLiveUpdate ? '⚡' : ''}</td>
+        </tr>`;
+        tbody.innerHTML = rowHTML;
+    }
+
+    init();
+</script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Gallery</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* Header */
+header {
+  background: #2e7d32;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+}
+/* ================= NAV ================= */
+nav {
+  background-color: rgba(0, 0, 50, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav a {
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+nav a:hover {
+  background-color: #1a237e;
+}
+
+/* Gallery Table */
+.video-gallery {
+  max-width: 1200px;
+  margin: 20px auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* Each video container */
+.video-item {
+  flex: 0 0 calc(33.33% - 20px); /* 3 per row */
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.video-item iframe {
+  width: 100%;
+  height: 200px;
+  border: none;
+  border-radius: 6px;
+}
+
+/* Video title */
+.video-item h4 {
+  font-size: 16px;
+  margin: 10px 0 0;
+}
+
+/* Responsive: 2 per row for tablets */
+@media (max-width: 900px) {
+  .video-item {
+    flex: 0 0 calc(50% - 20px);
+  }
+}
+
+/* Responsive: 1 per row for mobile */
+@media (max-width: 600px) {
+  .video-item {
+    flex: 0 0 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>Video Gallery</header>
+<!-- MENU -->
+<nav>
+  <a href="index.html">Home</a>
+  <!--
+  <a href="stations.html">Stations</a>
+  <a href="timing.html">Train Timing</a>
+  <a href="ticketing.html">Ticketing</a>
+  <a href="complaint.html">Register Complaint</a>
+  <a href="contactus.html">Contact Us</a>
+  <a href="gallery.html">Gallery</a>
+  <a href="tracking.html" class="blink-tracking">Train Tracking</a>
+  -->
+</nav>
+<div class="video-gallery" id="videoGallery">
+  <!-- Video items will be injected here -->
+</div>
+
+<script>
+// Array of YouTube video links
+const videos = [
+  { url: "https://www.youtube.com/embed/6aW1KYOQzw8", title: "Khanpur Inspection" },
+  { url: "https://www.youtube.com/embed/TybV8BkjkvE", title: "Jamalo Train Initiative" },
+  { url: "https://www.youtube.com/embed/yT8yL9KTQr4", title: "14-August-25, DS Office Sukkur" },
+  { url: "https://www.youtube.com/embed/XduX4k32ZjY", title: "LRK Section" },
+  { url: "https://www.youtube.com/embed/VIDEO_ID5", title: "Video 5" },
+  { url: "https://www.youtube.com/embed/VIDEO_ID6", title: "Video 6" }
+];
+
+const gallery = document.getElementById("videoGallery");
+
+// Generate video items
+videos.forEach(v => {
+  const div = document.createElement("div");
+  div.className = "video-item";
+  div.innerHTML = `
+    <iframe src="${v.url}" allowfullscreen></iframe>
+    <h4>${v.title}</h4>
+  `;
+  gallery.appendChild(div);
+});
+</script>
+
+</body>
+</html>

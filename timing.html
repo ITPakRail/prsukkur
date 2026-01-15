@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Train Timing – Sukkur Division</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Choices.js CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css">
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f2f2f2;
+}
+
+/* ================= HEADER ================= */
+header {
+  background: #2e7d32;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-size: 22px;
+}
+
+/* ================= NAVIGATION ================= */
+nav {
+  background-color: rgba(0, 0, 50, 0.9);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+nav a {
+  color: white;
+  padding: 12px 20px;
+  text-decoration: none;
+  font-size: 16px;
+  text-align: center;
+  transition: background 0.3s;
+}
+
+nav a:hover {
+  background-color: #1a237e;
+}
+
+/* ================= SEARCH PANEL ================= */
+.panel {
+  background: navy;
+  padding: 15px;
+  color: white;
+  text-align: center;
+}
+
+button {
+  padding: 8px;
+  width: 90%;
+  max-width: 400px;
+  margin: 5px auto;
+  display: block;
+  cursor: pointer;
+}
+
+/* ================= TABLE ================= */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 15px;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background: #333;
+  color: white;
+}
+
+#trainTitle {
+  margin-top: 15px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* ================= Choices.js overrides ================= */
+.choices__inner {
+  background-color: white !important;
+  color: black !important;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  min-height: 40px;
+}
+
+.choices__list--single .choices__item,
+.choices__list--dropdown .choices__item,
+.choices__input {
+  color: black !important;
+}
+
+.choices__list--dropdown {
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: white !important;
+}
+
+.dropdown-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+}
+/* ===== Force vertical scrollbar in Choices dropdown ===== */
+.choices__list--dropdown {
+  max-height: 200px !important;
+  overflow-y: auto !important;
+}
+
+/* Show scrollbar clearly (Chrome, Edge, Brave) */
+.choices__list--dropdown::-webkit-scrollbar {
+  width: 10px;
+}
+
+.choices__list--dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.choices__list--dropdown::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+.choices__list--dropdown::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Firefox scrollbar */
+.choices__list--dropdown {
+  scrollbar-width: auto;
+  scrollbar-color: #888 #f1f1f1;
+}
+/* ===== Blinking Train Tracking menu ===== */
+.blink-tracking {
+  color: yellow !important;
+  font-weight: bold;
+  animation: blinkText 1s infinite;
+}
+
+@keyframes blinkText {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>Pakistan Railways – Sukkur Division (Train Timing)</header>
+
+<!-- MENU -->
+<nav>
+  <a href="index.html">Home</a>
+  <a href="stations.html">Stations</a>
+  <a href="timing.html">Train Timing</a>
+    <a href="availSeats.html" class="seat-avail">Seat Availability</a>
+  <a href="ticketing.html">Ticketing</a>
+  <a href="complaint.html">Register Complaint</a>
+  <a href="contactus.html">Contact Us</a>
+  <a href="tracking1.html" class="seat-avail">Train Tracking</a>
+</nav>
+
+<!-- SEARCH PANEL -->
+<div class="panel">
+  <div class="dropdown-container">
+    <select id="trainSelect"></select>
+  </div>
+  <button onclick="loadTiming()">Search</button>
+</div>
+
+<div id="trainTitle"></div>
+
+<table id="resultTable" style="display:none">
+  <thead>
+    <tr>
+      <th>Station</th>
+      <th>Arrival</th>
+      <th>Departure</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Choices.js JS -->
+<script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbya7KRQupcY_anV146gjtN0EeH6hQakjh20emQsgJqY0seA8MRV0vqst3zyE4zL2t6b/exec";
+const sel = document.getElementById("trainSelect");
+
+/* Load trains */
+fetch(API + "?action=trains")
+  .then(r => r.json())
+  .then(data => {
+    sel.innerHTML = `<option value="">Select Train...</option>`;
+    data.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t.id;
+      opt.textContent = `${t.id} - ${t.name}`;
+      sel.appendChild(opt);
+    });
+
+    const choices = new Choices(sel, {
+      searchEnabled: true,
+      itemSelectText: '',
+      placeholderValue: "Select Train...",
+      shouldSort: false,
+      position: 'bottom',
+      searchPlaceholderValue: "Type to search..."
+    });
+
+    const choicesDiv = sel.closest('.choices');
+    choicesDiv.style.width = document.querySelector('button').offsetWidth + 'px';
+  });
+
+/* Load timing */
+function loadTiming() {
+  const trainId = sel.value;
+  if (!trainId) return alert("Select a train");
+
+  fetch(API + "?action=timing&trainid=" + trainId)
+    .then(r => r.json())
+    .then(rows => {
+      document.getElementById("resultTable").style.display = "table";
+      const tbody = document.querySelector("#resultTable tbody");
+      tbody.innerHTML = "";
+
+      document.getElementById("trainTitle").innerText =
+        sel.selectedOptions[0].text;
+
+      rows.forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r.station}</td>
+          <td>${r.arrival}</td>
+          <td>${r.departure}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+}
+</script>
+
+</body>
+</html>
