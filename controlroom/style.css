@@ -66,3 +66,58 @@ th, td {
 th {
   background: #f0f0f0;
 }
+/* ===== MAIN CONTENT LAYOUT ===== */
+.content {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+}
+
+/* LEFT PANEL */
+.left-panel {
+  width: 60%;
+}
+
+/* RIGHT PANEL */
+.right-panel {
+  width: 40%;
+  background: white;
+  border: 1px solid #ccc;
+  min-height: 300px;
+  padding: 10px;
+}
+
+/* ===== TABLE SETTINGS ===== */
+.table-container {
+  background: white;
+  border: 1px solid #ccc;
+  max-height: 180px;      /* ~5 rows */
+  overflow-y: auto;       /* vertical scroll */
+}
+
+/* TABLE STYLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  font-size: 13px;
+}
+
+th {
+  background: #f0f0f0;
+  position: sticky;
+  top: 0;
+}
+
+/* ===== LINE CHART PLACEHOLDER ===== */
+.chart-panel {
+  margin-top: 10px;
+  background: white;
+  border: 1px solid #ccc;
+  height: 200px;
+}
+
