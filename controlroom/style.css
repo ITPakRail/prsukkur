@@ -4,11 +4,23 @@ body {
   background: #f4f6f8;
 }
 
+/* ===== TOP HEADER ===== */
 .header {
   background: #003366;
   color: white;
-  padding: 20px;
+  padding: 6px 10px;   /* reduced height */
   text-align: center;
+}
+
+.header h1 {
+  margin: 2px 0;
+  font-size: 20px;
+}
+
+.header h2 {
+  margin: 2px 0;
+  font-size: 15px;
+  font-weight: normal;
 }
 
 .menu {
