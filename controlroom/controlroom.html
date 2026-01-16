@@ -50,23 +50,49 @@
   </select>
 </div>
 
-<!-- DATA TABLE -->
-<div class="table-container">
-<table id="dataTable">
- <thead>
-  <tr>
-    <th>Date</th>
-    <th>Train</th>
-    <th>Engine</th>
-    <th>Direction</th>
-    <th>Delay Hrs</th>
-    <th>Total Detention</th>
-  </tr>
-</thead>
+<!-- MAIN CONTENT AREA -->
+<div class="content">
 
-  <tbody></tbody>
-</table>
+  <!-- LEFT PANEL : TABLE -->
+  <div class="left-panel">
+
+    <!-- TABLE WRAPPER (SCROLLABLE) -->
+    <div class="table-container">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Train</th>
+            <th>Engine</th>
+            <th>Direction</th>
+            <th>Delay Hrs</th>
+            <th>Total Detention</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- LINE CHART PANEL (FOR LATER USE) -->
+    <div class="chart-panel">
+      <!-- Line chart will be added here later -->
+      <p style="text-align:center;color:#777;">
+        Line Chart Area (Coming Soon)
+      </p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT PANEL : CHARTS / SUMMARY -->
+  <div class="right-panel">
+    <!-- Future: bar chart, pie chart, KPIs -->
+    <p style="text-align:center;color:#777;">
+      Charts / KPIs Panel (Future Use)
+    </p>
+  </div>
+
 </div>
+
 
 <script src="app.js"></script>
 </body>
