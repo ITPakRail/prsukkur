@@ -71,8 +71,9 @@ function renderTable(data) {
         <td>${r["DIRECTION"]}</td>
         <td>${r["DELAY HRS"]}</td>
         <td>${r["TOTAL DETENTION HOURS"]}</td>
-        <td>${r["DETENTION REASON"]}</td>
-      </tr>`;
+      </tr>
+    `;
   });
 }
+
 
