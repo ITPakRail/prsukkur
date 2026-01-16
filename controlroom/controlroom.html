@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pakistan Railways – Control Room</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- TOP HEADER -->
+<div class="header">
+  <h1>Pakistan Railways – Sukkur Division</h1>
+  <h2>Control Room</h2>
+</div>
+
+<!-- MENU -->
+<div class="menu">
+  <a href="#">Home</a>
+  <a href="#">Detention</a>
+  <a href="#">Summary</a>
+</div>
+
+<!-- FILTER PANEL -->
+<div class="filters">
+  <input type="date" id="dateFilter">
+
+  <select id="trainFilter">
+    <option value="">All Trains</option>
+  </select>
+
+  <select id="engineFilter">
+    <option value="">All Engines</option>
+  </select>
+
+  <select id="directionFilter">
+    <option value="">All Directions</option>
+    <option value="UP">UP</option>
+    <option value="DN">DN</option>
+  </select>
+
+  <select id="headFilter">
+    <option value="">All Heads</option>
+    <option value="LOCO">LOCO</option>
+    <option value="C and W">C and W</option>
+    <option value="PRECEDENCE">PRECEDENCE</option>
+    <option value="INCI:MISC">INCI:MISC</option>
+  </select>
+</div>
+
+<!-- DATA TABLE -->
+<div class="table-container">
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Train</th>
+      <th>Engine</th>
+      <th>Direction</th>
+      <th>Delay Hrs</th>
+      <th>Total Detention</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
