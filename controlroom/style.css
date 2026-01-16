@@ -1,0 +1,56 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #f4f6f8;
+}
+
+.header {
+  background: #003366;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.menu {
+  background: #e0e0e0;
+  padding: 10px;
+}
+
+.menu a {
+  margin-right: 15px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #003366;
+}
+
+.filters {
+  background: white;
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filters select, .filters input {
+  padding: 5px;
+}
+
+.table-container {
+  padding: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 14px;
+}
+
+th {
+  background: #f0f0f0;
+}
