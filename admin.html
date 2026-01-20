@@ -118,7 +118,7 @@ function renderTable(complaints) {
         // Change: Use 'text/plain' to bypass Preflight/NetworkError
         const res = await fetch(BASE_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+         headers: { "Content-Type": "text/plain" },
           body: JSON.stringify(payload)
         });
         
