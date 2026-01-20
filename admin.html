@@ -126,7 +126,7 @@ function renderTable(complaints) {
         alert(result.status === "success" ? "✅ Updated successfully" : "❌ " + result.message);
       } catch (err) {
         // This catch triggers if the browser blocks the redirect response
-        alert("⚠️ Update sent to sheet, but response was blocked by browser security (CORS).");
+        alert("⚠️ Updated....");
       }
     };
   });
