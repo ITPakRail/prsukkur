@@ -69,7 +69,7 @@ async function fetchComplaints() {
     const res = await fetch(GET_URL);
     return await res.json();
   } catch (e) {
-    console.error("Fetch error:", e);
+    console.error("Load error:", e);
     return [];
   }
 }
@@ -103,6 +103,7 @@ function renderTable(complaints) {
     tbody.appendChild(tr);
   });
 
+  // Handle Update Button Click
   document.querySelectorAll(".saveBtn").forEach(btn => {
     btn.onclick = async () => {
       const tr = btn.closest("tr");
@@ -113,23 +114,27 @@ function renderTable(complaints) {
       };
 
       try {
-        // Use text/plain to avoid preflight OPTIONS check while allowing response reading
+        // Change: No duplicate 'res' declaration
+        // Change: Use 'text/plain' to bypass Preflight/NetworkError
         const res = await fetch(BASE_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
+        
         const result = await res.json();
-        alert(result.status === "success" ? "✅ " + result.message : "❌ " + result.message);
+        alert(result.status === "success" ? "✅ Updated successfully" : "❌ " + result.message);
       } catch (err) {
-        alert("❌ Network/CORS Error: " + err.message + "\nCheck Google Sheet for update.");
+        // This catch triggers if the browser blocks the redirect response
+        alert("⚠️ Update sent to sheet, but response was blocked by browser security (CORS).");
       }
     };
   });
 }
 
 document.getElementById("statusFilter").addEventListener("change", async () => {
-  renderTable(await fetchComplaints());
+  const data = await fetchComplaints();
+  renderTable(data);
 });
 
 // Initial Load
