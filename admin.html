@@ -189,7 +189,7 @@ function renderTable(complaints) {
         remarks: tr.querySelector(".remarks").value
       };
 
-   try {
+try {
   await fetch(UPDATE_URL, {
     method: "POST",
     mode: "no-cors", 
@@ -200,6 +200,7 @@ function renderTable(complaints) {
 } catch (err) {
   alert("❌ Network Error: " + err.message);
 }
+      
 document.getElementById("statusFilter").addEventListener("change", async () => {
   renderTable(await fetchComplaints());
 });
