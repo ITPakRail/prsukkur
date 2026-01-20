@@ -190,11 +190,11 @@ function renderTable(complaints) {
       };
 
       try {
-        const res = await fetch(UPDATE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+       const res = await fetch(UPDATE_URL, {
+  method: "POST",
+  mode: "no-cors", // Tells the browser not to do a preflight check
+  body: JSON.stringify(payload) 
+});
         const result = await res.json();
         alert(result.status === "success" ? "✅ Updated successfully" : "❌ " + result.message);
       } catch (err) {
