@@ -189,21 +189,17 @@ function renderTable(complaints) {
         remarks: tr.querySelector(".remarks").value
       };
 
-     try {
-  const res = await fetch(UPDATE_URL, {
+   try {
+  await fetch(UPDATE_URL, {
     method: "POST",
-    // This header is "simple" enough to usually avoid the CORS Preflight error
-    headers: { "Content-Type": "text/plain" }, 
+    mode: "no-cors", 
     body: JSON.stringify(payload)
   });
-  
-  const result = await res.json(); 
-  alert("✅ " + result.message);
+  // Since mode is no-cors, we don't try to parse res.json()
+  alert("✅ Update request sent successfully!");
 } catch (err) {
-  // If this still gives NetworkError, stick with Option 1
-  alert("❌ Error: " + err.message);
+  alert("❌ Network Error: " + err.message);
 }
-
 document.getElementById("statusFilter").addEventListener("change", async () => {
   renderTable(await fetchComplaints());
 });
