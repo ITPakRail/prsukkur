@@ -1,7 +1,7 @@
 /* ================================
    CONFIG
 ================================ */
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwB75D58Hso-8D-K6_Vf5I75PL-kWQFvzKj2sCB5yJKwG4_71hxthehjdJVObMeWGpwiQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxcwFHb-UU_TNZ44XV2g7Prn_N_ste9PXdfDUA9_UuW08TNZzM_pYmKpEo5bJJcLB8LXw/exec";
 
 /* ================================
    INJECT CHATBOT HTML
