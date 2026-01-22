@@ -12,9 +12,6 @@ document.body.insertAdjacentHTML("beforeend", `
 <div id="chatbot-box">
   <div id="chatbot-header">Railway Assistant</div>
 
-  <!-- FAQ MENU -->
-  <div id="chatbot-faq"></div>
-
   <!-- CHAT MESSAGES -->
   <div id="chatbot-messages"></div>
 
@@ -27,7 +24,7 @@ document.body.insertAdjacentHTML("beforeend", `
 `);
 
 /* ================================
-   TOGGLE CHAT WINDOW
+   CHATBOX TOGGLE
 ================================ */
 document.getElementById("chatbot-btn").onclick = () => {
   const box = document.getElementById("chatbot-box");
@@ -40,15 +37,14 @@ document.getElementById("chatbot-btn").onclick = () => {
 function addMessage(text, from = "Bot") {
   const div = document.createElement("div");
   div.style.marginBottom = "8px";
+  div.style.wordBreak = "break-word";
   div.innerHTML = `<b>${from}:</b> ${text}`;
   document.getElementById("chatbot-messages").appendChild(div);
-
-  // auto scroll
   div.scrollIntoView({ behavior: "smooth" });
 }
 
 /* ================================
-   SEND USER QUERY
+   SEND QUERY TO GAS
 ================================ */
 function sendQuery() {
   const input = document.getElementById("chat-input");
@@ -61,9 +57,11 @@ function sendQuery() {
   fetch(`${GAS_URL}?q=${encodeURIComponent(text)}`)
     .then(res => res.json())
     .then(data => {
-      data.forEach(item => {
-        addMessage(item.answer);
-      });
+      if (!data || !data.length) {
+        addMessage("No response from server.");
+        return;
+      }
+      data.forEach(item => addMessage(item.answer));
     })
     .catch(() => {
       addMessage("Error connecting to server. Please try again.");
@@ -79,48 +77,6 @@ document.getElementById("chat-input").addEventListener("keypress", e => {
 });
 
 /* ================================
-   LOAD FAQ CATEGORIES (ON LOAD)
+   INITIAL GREETING
 ================================ */
-function loadFaqCategories() {
-  fetch(`${GAS_URL}?action=getCategories`)
-    .then(res => res.json())
-    .then(categories => {
-      const faqDiv = document.getElementById("chatbot-faq");
-      faqDiv.innerHTML = "";
-
-      categories.forEach(cat => {
-        const btn = document.createElement("button");
-        btn.className = "faq-btn";
-        btn.innerText = cat;
-        btn.onclick = () => loadCategory(cat);
-        faqDiv.appendChild(btn);
-      });
-    })
-    .catch(() => {
-      console.error("Failed to load FAQ categories");
-    });
-}
-
-/* ================================
-   LOAD CATEGORY QUESTIONS
-================================ */
-function loadCategory(category) {
-  addMessage(`Showing information for <b>${category}</b>`);
-
-  fetch(`${GAS_URL}?action=getByCategory&category=${encodeURIComponent(category)}`)
-    .then(res => res.json())
-    .then(items => {
-      items.forEach(item => {
-        addMessage(`<b>${item.question}</b><br>${item.answer}`);
-      });
-    })
-    .catch(() => {
-      addMessage("Unable to load this category right now.");
-    });
-}
-
-/* ================================
-   INITIAL LOAD
-================================ */
-loadFaqCategories();
-addMessage("Welcome! Please choose an option above or type your question.");
+addMessage("Welcome! Type your question, e.g., 'ROHRI to LAHORE train'.");
