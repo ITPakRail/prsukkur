@@ -15,40 +15,48 @@
   position: fixed;
   bottom: 90px;
   right: 20px;
-  width: 320px;
-  height: 400px;
+  width: 350px;
+  max-height: 500px;
   background: white;
   border-radius: 10px;
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
   display: none;
   flex-direction: column;
+  font-family: Arial, sans-serif;
 }
 
 #chatbot-header {
   background: #0a7cff;
   color: white;
   padding: 10px;
+  font-weight: bold;
 }
 
 #chatbot-messages {
   flex: 1;
   padding: 10px;
   overflow-y: auto;
+  border-bottom: 1px solid #ddd;
 }
 
 #chatbot-input {
   display: flex;
+  padding: 5px;
 }
 
 #chatbot-input input {
   flex: 1;
   padding: 8px;
-  border: none;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 
 #chatbot-input button {
   background: #0a7cff;
   color: white;
   border: none;
-  padding: 8px;
+  padding: 8px 12px;
+  margin-left: 5px;
+  border-radius: 5px;
+  cursor: pointer;
 }
