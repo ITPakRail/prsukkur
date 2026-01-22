@@ -1,21 +1,16 @@
 /* ================================
-   CONFIG
+   CHATBOT CONFIG
 ================================ */
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxcwFHb-UU_TNZ44XV2g7Prn_N_ste9PXdfDUA9_UuW08TNZzM_pYmKpEo5bJJcLB8LXw/exec";
 
 /* ================================
-   INJECT CHATBOT HTML
+   INJECT HTML
 ================================ */
 document.body.insertAdjacentHTML("beforeend", `
 <div id="chatbot-btn" title="Chat Assistant">💬</div>
-
 <div id="chatbot-box">
   <div id="chatbot-header">Railway Assistant</div>
-
-  <!-- CHAT MESSAGES -->
   <div id="chatbot-messages"></div>
-
-  <!-- INPUT -->
   <div id="chatbot-input">
     <input id="chat-input" placeholder="Type your question..." />
     <button id="chat-send-btn">Send</button>
@@ -24,7 +19,7 @@ document.body.insertAdjacentHTML("beforeend", `
 `);
 
 /* ================================
-   CHATBOX TOGGLE
+   TOGGLE CHAT
 ================================ */
 document.getElementById("chatbot-btn").onclick = () => {
   const box = document.getElementById("chatbot-box");
@@ -37,14 +32,13 @@ document.getElementById("chatbot-btn").onclick = () => {
 function addMessage(text, from = "Bot") {
   const div = document.createElement("div");
   div.style.marginBottom = "8px";
-  div.style.wordBreak = "break-word";
   div.innerHTML = `<b>${from}:</b> ${text}`;
   document.getElementById("chatbot-messages").appendChild(div);
   div.scrollIntoView({ behavior: "smooth" });
 }
 
 /* ================================
-   SEND QUERY TO GAS
+   SEND QUERY
 ================================ */
 function sendQuery() {
   const input = document.getElementById("chat-input");
@@ -57,15 +51,9 @@ function sendQuery() {
   fetch(`${GAS_URL}?q=${encodeURIComponent(text)}`)
     .then(res => res.json())
     .then(data => {
-      if (!data || !data.length) {
-        addMessage("No response from server.");
-        return;
-      }
       data.forEach(item => addMessage(item.answer));
     })
-    .catch(() => {
-      addMessage("Error connecting to server. Please try again.");
-    });
+    .catch(() => addMessage("Error connecting to server."));
 }
 
 /* ================================
@@ -77,6 +65,6 @@ document.getElementById("chat-input").addEventListener("keypress", e => {
 });
 
 /* ================================
-   INITIAL GREETING
+   INITIAL WELCOME
 ================================ */
 addMessage("Welcome! Type your question, e.g., 'ROHRI to LAHORE train'.");
