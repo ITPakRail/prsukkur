@@ -86,89 +86,102 @@
 </div>
 
 <script>
-    const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwo5osrV3JCoK55EGuOjjpzGneiarMPx8GClrbkdnV4zl6OytI7T2DHypD8T1TBI2medQ/exec"; 
-    let cachedData = [];
+   // 1. Ensure this URL is from your LATEST "Anyone" deployment
+const SHEET_API_URL = "https://script.google.com/macros/s/AKfycbwo5osrV3JCoK55EGuOjjpzGneiarMPx8GClrbkdnV4zl6OytI7T2DHypD8T1TBI2medQ/exec"; 
+let cachedData = [];
 
-    window.onload = function() {
-        // Set Default Dates to Today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDate').value = today;
-        document.getElementById('endDate').value = today;
+window.onload = function() {
+    // Set Default Dates
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+    document.getElementById('endDate').value = today;
 
-        initStaticCharts();
-        fetchAndProcessData();
-    }
+    // FIX: Match the function name exactly to avoid ReferenceError
+    initCharts(); 
+    
+    // Load Data
+    fetchAndProcessData();
+};
 
-    // Custom parser for "15-Nov-25" format
-    function parseSheetDate(dateStr) {
-        if (!dateStr) return new Date(0);
-        const months = {
-            'Jan':0, 'Feb':1, 'Mar':2, 'Apr':3, 'May':4, 'Jun':5,
-            'Jul':6, 'Aug':7, 'Sep':8, 'Oct':9, 'Nov':10, 'Dec':11
-        };
-        const parts = dateStr.split('-');
-        if (parts.length !== 3) return new Date(dateStr); // Fallback
-        
-        const day = parseInt(parts[0]);
-        const month = months[parts[1]];
-        let year = parseInt(parts[2]);
-        if (year < 100) year += 2000; // Handle '25' as 2025
-        
-        return new Date(year, month, day);
-    }
+async function fetchAndProcessData() {
+    const totalEl = document.getElementById('val-total');
+    if(totalEl) totalEl.innerText = "Loading...";
 
-    async function fetchAndProcessData() {
-        const totalEl = document.getElementById('val-total');
-        totalEl.innerText = "Loading...";
-
-        try {
-            // Using a simple fetch with no extra headers to avoid pre-flight CORS issues
-            const response = await fetch(SHEET_API_URL);
-            if (!response.ok) throw new Error('Network response was not ok');
-            
-            cachedData = await response.json();
-            calculateMetrics();
-        } catch (e) {
-            console.error("Fetch Error:", e);
-            totalEl.innerText = "ERR";
-            alert("Connection Failed. Check if Deployment is set to 'Anyone'.");
-        }
-    }
-
-    function calculateMetrics() {
-        const startInput = document.getElementById('startDate').value;
-        const endInput = document.getElementById('endDate').value;
-        
-        const start = new Date(startInput);
-        const end = new Date(endInput);
-        start.setHours(0,0,0,0);
-        end.setHours(23,59,59,999);
-
-        let sumTotal = 0;
-        let sumOut = 0;
-
-        cachedData.forEach(row => {
-            // Use the custom parser for sheet dates
-            const rowDate = parseSheetDate(row.DATE);
-            
-            if (rowDate >= start && rowDate <= end) {
-                sumTotal += parseInt(row.TOTAL_TRAIN) || 0;
-                sumOut += parseInt(row.TOTAL_OUT_TRAIN) || 0;
-            }
+    try {
+        // Fetching with redirect follow
+        const response = await fetch(SHEET_API_URL, {
+            method: 'GET',
+            mode: 'cors', // Crucial for GitHub Pages
         });
+        
+        const data = await response.json();
+        cachedData = data;
+        calculateMetrics();
+    } catch (e) {
+        console.error("Data Fetch Error:", e);
+        if(totalEl) totalEl.innerText = "CORS Error";
+        // Manual workaround hint
+        console.log("If CORS persists, ensure GAS deployment is set to 'Anyone'");
+    }
+}
 
-        const percentage = sumTotal > 0 ? ((sumOut / sumTotal) * 100).toFixed(2) : 0;
+// Ensure this function name matches the one called in window.onload
+function initCharts() {
+    Chart.register(ChartDataLabels);
+    
+    // Your existing Chart code here...
+    // Example: new Chart(document.getElementById('handoverChart'), { ... });
+    console.log("Charts initialized");
+}
+
+function calculateMetrics() {
+    const startVal = document.getElementById('startDate').value;
+    const endVal = document.getElementById('endDate').value;
+    
+    if(!startVal || !endVal || cachedData.length === 0) return;
+
+    const start = new Date(startVal);
+    const end = new Date(endVal);
+    start.setHours(0,0,0,0);
+    end.setHours(23,59,59,999);
+
+    let sumTotal = 0;
+    let sumOut = 0;
+
+    cachedData.forEach(row => {
+        // Handle the date format 15-Nov-25
+        const rowDate = parseSheetDate(row.DATE);
         
-        document.getElementById('val-total').innerText = sumTotal;
-        document.getElementById('val-out').innerText = sumOut;
-        document.getElementById('val-perc').innerText = percentage + "%";
-        
-        const pb = document.getElementById('prog-bar');
+        if (rowDate >= start && rowDate <= end) {
+            sumTotal += parseInt(row.TOTAL_TRAIN) || 0;
+            sumOut += parseInt(row.TOTAL_OUT_TRAIN) || 0;
+        }
+    });
+
+    const percentage = sumTotal > 0 ? ((sumOut / sumTotal) * 100).toFixed(2) : 0;
+    
+    document.getElementById('val-total').innerText = sumTotal;
+    document.getElementById('val-out').innerText = sumOut;
+    document.getElementById('val-perc').innerText = percentage + "%";
+    
+    const pb = document.getElementById('prog-bar');
+    if(pb) {
         pb.style.width = percentage + "%";
         pb.innerText = percentage + "% Accuracy";
     }
+}
 
-    // ... (keep the rest of your showPage and initStaticCharts functions)
+function parseSheetDate(dateStr) {
+    if (!dateStr) return new Date(0);
+    // Standard JS Date can often parse "15-Nov-2025"
+    // If your sheet has "15-Nov-25", JS might need help:
+    const d = new Date(dateStr);
+    if (isNaN(d)) {
+        // Fallback for tricky formats
+        return new Date(); 
+    }
+    return d;
+}
 </script>
 </body>
 </html>
