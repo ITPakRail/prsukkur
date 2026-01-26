@@ -67,4 +67,4 @@ document.getElementById("chat-input").addEventListener("keypress", e => {
 /* ================================
    INITIAL WELCOME
 ================================ */
-addMessage("Welcome! Type your question, e.g., 'ROHRI to LAHORE train'.");
+addMessage("Welcome! I am Railway Information Assistant'.");
