@@ -362,27 +362,34 @@ function toggleMenu() {
 </div>
   
 <footer class="footer">
-  <div class="footer-container" style="text-align:center; font-family:Arial, sans-serif; padding: 15px 0;">
+  <div class="footer-container" style="
+    display: flex !important; 
+    flex-direction: column !important; 
+    align-items: center !important; 
+    text-align: center; 
+    font-family: Arial, sans-serif; 
+    padding: 20px 0; 
+    width: 100%;">
 
-    <div style="display: block; width: 100%; margin-bottom: 12px;">
+    <div style="margin-bottom: 15px; width: 100%;">
       A Digital Transformation Initiative by 
-      <span style="color: yellow; background-color: green; padding: 2px 6px; border-radius: 3px;">
+      <span style="color: yellow; background-color: green; padding: 3px 8px; border-radius: 4px; display: inline-block;">
         Mr. Jamshaid Alam
       </span> 
       during his tenure as DS Sukkur
     </div>
 
-    <div style="display: block; width: 100%;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; width: 100%;">
       
-      <a href="https://facebook.com/dssukkur1" target="_blank" style="color:#1877f2; text-decoration:none; margin: 0 15px;">
+      <a href="https://facebook.com/dssukkur1" target="_blank" style="color:#1877f2; text-decoration:none; font-size: 16px;">
         <i class="fab fa-facebook"></i> Follow us on Facebook
       </a>
 
-      <a href="https://www.youtube.com/@pakrailsuk" target="_blank" style="color:#ff0000; text-decoration:none; margin: 0 15px;">
+      <a href="https://www.youtube.com/@pakrailsuk" target="_blank" style="color:#ff0000; text-decoration:none; font-size: 16px;">
         <i class="fab fa-youtube"></i> YouTube
       </a>
 
-      <span style="color: #333; margin-left: 15px;">
+      <span style="color: #444; font-size: 16px;">
         Copyright © 2026 Pakistan Railways Sukkur Division
       </span>
       
@@ -390,6 +397,7 @@ function toggleMenu() {
 
   </div>
 </footer>
+  
   <!-- SCRIPT FOR CURRENT YEAR -->
 <script>
   document.getElementById("footerYear").textContent = new Date().getFullYear();
